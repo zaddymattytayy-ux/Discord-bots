@@ -135,6 +135,81 @@ client.on('interactionCreate', async interaction => {
                 });
             }
         }
+
+        // Handle createguild modal
+        if (interaction.customId === 'createguild_modal') {
+            const guildName = interaction.fields.getTextInputValue('guildname');
+            const guildMaster = interaction.fields.getTextInputValue('guildmaster');
+            const guildNotice = interaction.fields.getTextInputValue('guildnotice') || '';
+
+            // Validate guild name (alphanumeric, 1-8 characters)
+            if (!/^[a-zA-Z0-9]{1,8}$/.test(guildName)) {
+                return interaction.reply({
+                    content: '❌ Guild name must be 1-8 alphanumeric characters only.',
+                    ephemeral: true
+                });
+            }
+
+            // Validate guild master account name
+            if (!/^[a-zA-Z0-9]{4,10}$/.test(guildMaster)) {
+                return interaction.reply({
+                    content: '❌ Guild master account must be 4-10 alphanumeric characters.',
+                    ephemeral: true
+                });
+            }
+
+            try {
+                // Check if guild name already exists
+                const guildCheck = await sql.query`SELECT G_Name FROM Guild WHERE G_Name = ${guildName}`;
+                if (guildCheck.recordset.length > 0) {
+                    return interaction.reply({
+                        content: '❌ A guild with this name already exists.',
+                        ephemeral: true
+                    });
+                }
+
+                // Check if guild master account exists
+                const masterCheck = await sql.query`SELECT memb___id FROM MEMB_INFO WHERE memb___id = ${guildMaster}`;
+                if (masterCheck.recordset.length === 0) {
+                    return interaction.reply({
+                        content: '❌ Guild master account does not exist. Please register the account first.',
+                        ephemeral: true
+                    });
+                }
+
+                // Check if guild master is already in a guild
+                const memberCheck = await sql.query`SELECT G_Name FROM GuildMember WHERE Name = ${guildMaster}`;
+                if (memberCheck.recordset.length > 0) {
+                    return interaction.reply({
+                        content: `❌ Account **${guildMaster}** is already a member of guild **${memberCheck.recordset[0].G_Name}**.`,
+                        ephemeral: true
+                    });
+                }
+
+                // Create guild in Guild table (Louis S6 structure)
+                await sql.query`
+                    INSERT INTO Guild (G_Name, G_Mark, G_Score, G_Master, G_Count, G_Notice, G_Type, G_Rival, G_Union, Number)
+                    VALUES (${guildName}, 0x00, 0, ${guildMaster}, 1, ${guildNotice}, 0, 0, 0, 0)
+                `;
+
+                // Add guild master to GuildMember table
+                await sql.query`
+                    INSERT INTO GuildMember (Name, G_Name, G_Level, G_Status)
+                    VALUES (${guildMaster}, ${guildName}, 0, 0)
+                `;
+
+                await interaction.reply({
+                    content: `✅ Guild **${guildName}** has been created!\n👑 Guild Master: **${guildMaster}**${guildNotice ? `\n📜 Notice: ${guildNotice}` : ''}`,
+                    ephemeral: true
+                });
+            } catch (err) {
+                console.error('Guild Creation Error:', err);
+                await interaction.reply({
+                    content: '❌ Database error occurred while creating guild. Please try again later.',
+                    ephemeral: true
+                });
+            }
+        }
     }
 });
 

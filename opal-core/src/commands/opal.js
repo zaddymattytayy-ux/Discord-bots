@@ -12,7 +12,11 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('list')
-                .setDescription('List all registered accounts (Admin only)')),
+                .setDescription('List all registered accounts (Admin only)'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('createguild')
+                .setDescription('Create a new guild (Admin only)')),
 
     async execute(interaction) {
         const subcommand = interaction.options.getSubcommand();
@@ -115,6 +119,57 @@ module.exports = {
                     content: '❌ Database error occurred while fetching accounts.'
                 });
             }
+        } else if (subcommand === 'createguild') {
+            // Check for admin permissions or specific role
+            const isAdmin = interaction.member.permissions.has(PermissionFlagsBits.Administrator);
+            const hasOpalRole = interaction.member.roles.cache.some(role =>
+                role.name.toLowerCase() === 'opal admin' || role.name.toLowerCase() === 'opaladmin'
+            );
+
+            if (!isAdmin && !hasOpalRole) {
+                return interaction.reply({
+                    content: '❌ Sorry, you cannot use this command. Admin or Opal Admin role required.',
+                    ephemeral: true
+                });
+            }
+
+            // Show modal for guild creation
+            const modal = new ModalBuilder()
+                .setCustomId('createguild_modal')
+                .setTitle('⚔️ Create New Guild');
+
+            const guildNameInput = new TextInputBuilder()
+                .setCustomId('guildname')
+                .setLabel('Guild Name (max 8 characters)')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(1)
+                .setMaxLength(8)
+                .setRequired(true)
+                .setPlaceholder('Enter guild name');
+
+            const guildMasterInput = new TextInputBuilder()
+                .setCustomId('guildmaster')
+                .setLabel('Guild Master Account Name')
+                .setStyle(TextInputStyle.Short)
+                .setMinLength(4)
+                .setMaxLength(10)
+                .setRequired(true)
+                .setPlaceholder('Enter the account name of guild master');
+
+            const guildNoticeInput = new TextInputBuilder()
+                .setCustomId('guildnotice')
+                .setLabel('Guild Notice/Description (optional)')
+                .setStyle(TextInputStyle.Paragraph)
+                .setMaxLength(60)
+                .setRequired(false)
+                .setPlaceholder('Enter guild notice or leave blank');
+
+            const row1 = new ActionRowBuilder().addComponents(guildNameInput);
+            const row2 = new ActionRowBuilder().addComponents(guildMasterInput);
+            const row3 = new ActionRowBuilder().addComponents(guildNoticeInput);
+
+            modal.addComponents(row1, row2, row3);
+            await interaction.showModal(modal);
         }
     },
 };
