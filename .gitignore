@@ -1,1 +1,16 @@
-base
+# Prevent bot tokens, DB credentials, and private configs
+/opal-core/.env
+
+# Ignore ticket system config & sensitive data
+/ticket-system/open-ticket/config/
+
+# (Optional extras you SHOULD ignore if present)
+*.log
+.env
+.env.local
+config.json
+credentials.json
+ecosystem.config.backup.*
+opal-core/.env
+opal-core/.env
+opal-core/.env

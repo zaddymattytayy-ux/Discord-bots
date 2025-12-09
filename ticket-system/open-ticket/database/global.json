@@ -1,0 +1,10 @@
+[
+    {"category":"opendiscord:last-version","key":"opendiscord:version","value":"v4.1.1"},
+    {"category":"opendiscord:last-version","key":"opendiscord:api","value":"v1.0.0"},
+    {"category":"opendiscord:last-version","key":"opendiscord:transcripts","value":"v2.1.0"},
+    {"category":"opendiscord:last-version","key":"opendiscord:livestatus","value":"v2.0.0"},
+    {"category":"opendiscord:last-version","key":"opendiscord:last-version","value":"v4.1.1"},
+    {"category":"opendiscord:option-suffix-counter","key":"player-support-51de6bb6","value":0},
+    {"category":"opendiscord:option-suffix-counter","key":"technical-support-e6420e05","value":0},
+    {"category":"opendiscord:panel-message","key":"1447929914945835099_1447991005390311437","value":"opalmu-ticket-system-a699b4d6"}
+]
